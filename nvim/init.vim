@@ -82,13 +82,13 @@ vnoremap ª :m '<-2<CR>gv=gv
 
 "reload vim config and install
 ":source $MYVIMRC | PlugInstall
-
 call plug#begin()
     " Appearance
+    Plug 'rebelot/kanagawa.nvim'
+    "Plug 'dracula/vim',{'as': 'dracula'}
+    "Plug 'EdenEast/nightfox.nvim'
     Plug 'vim-airline/vim-airline'
     Plug 'ryanoasis/vim-devicons'
-    "Plug 'dracula/vim',{'as': 'dracula'}
-    Plug 'EdenEast/nightfox.nvim'
     Plug 'yggdroot/indentline'
 
     " Utilities
@@ -97,14 +97,98 @@ call plug#begin()
     Plug 'ap/vim-css-color'
     Plug 'preservim/nerdtree'
     Plug 'preservim/nerdcommenter'
+    Plug 'tpope/vim-surround'
+    Plug 'tpope/vim-fugitive'
+    Plug 'codechips/coc-svelte', {'do': 'npm install'}
 
     " Completion / linters / formatters
-    Plug 'neoclide/coc.nvim',  {'branch': 'master', 'do': 'yarn install'}
+    Plug 'neoclide/coc.nvim',  {'branch': 'release'}
     Plug 'plasticboy/vim-markdown'
     Plug 'sbdchd/neoformat'
     Plug 'dense-analysis/ale'
-
+    Plug 'prettier/vim-prettier', { 'do': 'npm install --frozen-lockfile --production' }
+    Plug 'Shougo/context_filetype.vim'
     " Git
     Plug 'airblade/vim-gitgutter'
 call plug#end()
 
+colorscheme kanagawa
+
+" Prettier Settings
+let g:prettier#quickfix_enabled = 0
+let g:prettier#autoformat_require_pragma = 0
+au BufWritePre *.css,*.svelte,*.pcss,*.html,*.ts,*.js,*.json PrettierAsync
+
+" COC
+let g:coc_node_path = '$HOME/.nvm/versions/node/v12.16.3/bin/node'
+
+nmap ff  (coc-format-selected)
+nmap rn (coc-rename)
+nmap  gd (coc-definition)
+nmap  gy (coc-type-definition)
+nmap  gi (coc-implementation)
+nmap  gr (coc-references)
+
+set updatetime=300
+set shortmess+=c " don't give |ins-completion-menu| messages.
+
+" Use K to show documentation in preview window
+nnoremap  K :call show_documentation()
+
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
+
+if !exists('g:context_filetype#same_filetypes')
+  let g:context_filetype#filetypes = {}
+endif
+
+let g:context_filetype#filetypes.svelte =
+\ [
+\   {'filetype' : 'javascript', 'start' : '<script>', 'end' : '</script>'},
+\   {
+\     'filetype': 'typescript',
+\     'start': '<script\%( [^>]*\)\? \%(ts\|lang="\%(ts\|typescript\)"\)\%( [^>]*\)\?>',
+\     'end': '',
+\   },
+\   {'filetype' : 'css', 'start' : '<style \?.*>', 'end' : '</style>'},
+\ ]
+
+let g:ft = ''
+
+" NERDCommenter settings
+
+let g:NERDSpaceDelims = 1
+let g:NERDCompactSexyComs = 1
+let g:NERDCustomDelimiters = { 'html': { 'left': '' } }
+
+" Align comment delimiters to the left instead of following code indentation
+let g:NERDDefaultAlign = 'left'
+
+fu! NERDCommenter_before()
+  if (&ft == 'html') || (&ft == 'svelte')
+    let g:ft = &ft
+    let cfts = context_filetype#get_filetypes()
+    if len(cfts) > 0
+      if cfts[0] == 'svelte'
+        let cft = 'html'
+      elseif cfts[0] == 'scss'
+        let cft = 'css'
+      else
+        let cft = cfts[0]
+      endif
+      exe 'setf ' . cft
+    endif
+  endif
+endfu
+
+fu! NERDCommenter_after()
+  if (g:ft == 'html') || (g:ft == 'svelte')
+    exec 'setf ' . g:ft
+    let g:ft = ''
+  endif
+endfu
