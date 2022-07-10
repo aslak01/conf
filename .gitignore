@@ -6,3 +6,6 @@
 !README.md
 !nvim
 
+nvim/plugin/*
+nvim/coc-settings.json
+nvim/init.vim2
