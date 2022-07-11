@@ -70,10 +70,19 @@ return packer.startup(function(use)
   use "lukas-reineke/indent-blankline.nvim"
   use "goolord/alpha-nvim"
 
+  use "folke/which-key.nvim"
+
   -- Colorschemes
   use "folke/tokyonight.nvim"
   use "lunarvim/darkplus.nvim"
-  use 'Mofiqul/dracula.nvim'
+  use "Mofiqul/dracula.nvim"
+  use({
+    "mvllow/modes.nvim",
+    config = function()
+      require("modes").setup()
+    end
+  }) -- color modes cursor line
+  use "folke/lsp-colors.nvim"
 
   -- cmp plugins
   use "hrsh7th/nvim-cmp"  -- The completion plugin
@@ -104,7 +113,7 @@ return packer.startup(function(use)
 
   -- Git
   use "lewis6991/gitsigns.nvim"
-
+  use "kdheepak/lazygit.nvim"
   -- DAP
   use "mfussenegger/nvim-dap"
   use "rcarriga/nvim-dap-ui"
